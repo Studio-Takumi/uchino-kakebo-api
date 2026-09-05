@@ -1,0 +1,31 @@
+# Minimal Supabase local-dev config for reproducing the DB used by the tests.
+# If a newer CLI rejects this file, run `supabase init` to regenerate it, then
+# keep the migrations/ and seed.sql in this directory.
+project_id = "uchino-kakebo-api"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public"]
+# Matches the API's own limit cap so limit=1000 behaves the same locally.
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[studio]
+enabled = false
+
+[auth]
+# Kept enabled so the CLI issues/exposes the standard local anon & service_role
+# keys (the tests authenticate with the service_role key).
+enabled = true
+
+[realtime]
+enabled = false
+
+[storage]
+enabled = false

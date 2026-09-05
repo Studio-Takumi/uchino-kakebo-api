@@ -8,5 +8,9 @@ samconfig.toml
 .env
 .env.*
 
+# Supabase CLI local state (keep config.toml, migrations/, seed.sql)
+supabase/.temp/
+supabase/.branches/
+
 *.log
 .DS_Store
