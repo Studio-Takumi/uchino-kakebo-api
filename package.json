@@ -8,7 +8,10 @@
     "build": "sam build",
     "deploy": "sam deploy",
     "deploy:guided": "sam deploy --guided",
-    "local": "sam local start-api --env-vars env.json"
+    "local": "sam local start-api --env-vars env.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:db": "RUN_DB_TESTS=1 vitest run"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.89.0",
@@ -18,6 +21,7 @@
   "devDependencies": {
     "@types/aws-lambda": "^8.10.145",
     "@types/node": "^20.14.0",
-    "typescript": "^5.6.0"
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.8"
   }
 }

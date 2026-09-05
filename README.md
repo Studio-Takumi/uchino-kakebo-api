@@ -105,6 +105,35 @@ curl -H "x-api-key: <KEY>" "<ApiBaseUrl>/methods"
 
 ここまで通れば「API Gateway → Lambda → ルーティング → レスポンス」の配線はOK。あとは各ルートの実装を入れるだけ。
 
+## テスト
+
+2層構成:
+
+- **単体（DB不要・即実行）** … `tests/expensesQuery.test.ts`。`GET /expenses` のクエリ検証ロジック（`src/routes/expensesQuery.ts`）を純粋関数として検証。
+- **統合（ローカルSupabase必要）** … `tests/getExpenses.int.test.ts`。実際の Postgres + PostgREST に対してハンドラを叩き、クエリの組み合わせ（日付/金額範囲・タイトル部分一致・ワイルドカードのエスケープ・null末尾ソート・limit）を検証。`RUN_DB_TESTS=1` のときだけ実行され、未設定なら自動スキップ。
+
+```bash
+npm test          # 単体のみ（統合は自動スキップ）
+npm run test:db   # 統合も実行（要ローカルSupabase）
+```
+
+### 統合テストの前提（Docker + Supabase CLI）
+
+```bash
+brew install --cask docker      # Docker Desktop（起動しておく）
+brew install supabase/tap/supabase
+```
+
+```bash
+cd uchino-kakebo-api
+supabase start          # ローカルに Postgres + PostgREST を起動
+supabase db reset       # supabase/migrations + supabase/seed.sql を適用
+npm run test:db
+```
+
+- スキーマは `supabase/migrations/0001_init.sql`、シードは `supabase/seed.sql`（本番テーブルを再現。**ローカル専用**。本番には適用しない）。
+- 統合テストはローカルの既定値（URL `http://127.0.0.1:54321` / demo service_role キー / seed の `USER_ID`）を使用。異なる場合は環境変数で上書き可。
+
 ## 次のステップ（未着手）
 
 1. 各 `src/routes/*.ts` の実装（`doc/api-spec.md` 準拠。各ファイルの TODO コメント参照）
