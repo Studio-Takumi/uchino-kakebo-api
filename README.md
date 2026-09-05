@@ -107,14 +107,13 @@ curl -H "x-api-key: <KEY>" "<ApiBaseUrl>/methods"
 
 ## テスト
 
-2層構成:
+`GET /expenses` の統合テスト（`tests/getExpenses.int.test.ts`）。実際の Postgres + PostgREST に対してハンドラを叩き、クエリの組み合わせ（日付/金額範囲・タイトル部分一致・ワイルドカードのエスケープ・null末尾ソート・limit・400バリデーション）を検証する。`ilike` や nulls-last の挙動は DB 依存なので、実DBでこそ意味がある。`RUN_DB_TESTS=1` のときだけ実行され、未設定なら自動スキップ（＝Dockerなしでも `npm test` はgreen）。
 
-- **単体（DB不要・即実行）** … `tests/expensesQuery.test.ts`。`GET /expenses` のクエリ検証ロジック（`src/routes/expensesQuery.ts`）を純粋関数として検証。
-- **統合（ローカルSupabase必要）** … `tests/getExpenses.int.test.ts`。実際の Postgres + PostgREST に対してハンドラを叩き、クエリの組み合わせ（日付/金額範囲・タイトル部分一致・ワイルドカードのエスケープ・null末尾ソート・limit）を検証。`RUN_DB_TESTS=1` のときだけ実行され、未設定なら自動スキップ。
+> 実装（`src/routes/`）には手を入れず、エンドポイントを外側から検証する方針。
 
 ```bash
-npm test          # 単体のみ（統合は自動スキップ）
-npm run test:db   # 統合も実行（要ローカルSupabase）
+npm test          # RUN_DB_TESTS未設定 → 統合テストはスキップ
+npm run test:db   # 統合テストを実行（要ローカルSupabase）
 ```
 
 ### 統合テストの前提（Docker + Supabase CLI）
