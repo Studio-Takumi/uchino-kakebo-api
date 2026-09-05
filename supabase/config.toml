@@ -20,8 +20,9 @@ major_version = 15
 enabled = false
 
 [auth]
-# Not needed: the API uses the service_role key, which bypasses RLS.
-enabled = false
+# Kept enabled so the CLI issues/exposes the standard local anon & service_role
+# keys (the tests authenticate with the service_role key).
+enabled = true
 
 [realtime]
 enabled = false

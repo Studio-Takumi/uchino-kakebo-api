@@ -12,9 +12,11 @@
 // Supabase CLI defaults and can be overridden via env.
 
 // Set before importing the handler (getSupabase reads env lazily on first call).
+// Standard Supabase local defaults (deterministic: signed with the default local
+// JWT secret). Override via env if your local instance differs.
 process.env.SUPABASE_URL ??= 'http://127.0.0.1:54321';
 process.env.SUPABASE_SERVICE_ROLE_KEY ??=
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UtZGVtbyIsImlhdCI6MTY0MTc2OTIwMCwiZXhwIjoxNzk5NTM1NjAwfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q';
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU';
 process.env.USER_ID ??= '00000000-0000-0000-0000-000000000001';
 
 import type { APIGatewayProxyEvent } from 'aws-lambda';
