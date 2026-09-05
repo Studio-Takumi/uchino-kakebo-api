@@ -64,12 +64,18 @@
 
 | param | 説明 | 既定 |
 | --- | --- | --- |
-| `from` | `date >= from`（含む） | なし |
-| `to` | `date <= to`（含む） | なし |
+| `from` | `date >= from`（含む、`YYYY-MM-DD`） | なし |
+| `to` | `date <= to`（含む、`YYYY-MM-DD`） | なし |
+| `min` | `expenses >= min`（整数・0以上・含む） | なし |
+| `max` | `expenses <= max`（整数・0以上・含む） | なし |
+| `title` | タイトルの部分一致（大文字小文字無視、`ilike`） | なし |
 | `method_id` | 支払方法で絞る | なし |
 | `category_id` | カテゴリで絞る | なし |
-| `order` | `date.desc` / `date.asc` | `date.desc` |
+| `order` | `<date\|expenses>.<asc\|desc>` | `date.desc` |
 | `limit` | 最大件数（上限 1000） | 200 |
+
+- `order` の許可カラムは `date` / `expenses` のみ（allowlist）。`expenses` 指定時は同額の並びを安定させるため `date` 降順を第2キーにする。
+- `min > max` は 400。
 
 **用途例**
 - dedupe: `GET /expenses?from=2026-09-01&to=2026-09-30`
