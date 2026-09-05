@@ -1,0 +1,12 @@
+node_modules/
+.aws-sam/
+dist/
+
+# Local + deploy config that contain secrets — keep only the *.example.* versions
+env.json
+samconfig.toml
+.env
+.env.*
+
+*.log
+.DS_Store

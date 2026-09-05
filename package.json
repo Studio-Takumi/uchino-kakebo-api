@@ -1,0 +1,23 @@
+{
+  "name": "uchino-kakebo-api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Expense ingest API for Uchino Kakebo (API Gateway + Lambda, backed by Supabase)",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "sam build",
+    "deploy": "sam deploy",
+    "deploy:guided": "sam deploy --guided",
+    "local": "sam local start-api --env-vars env.json"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.89.0",
+    "esbuild": "^0.24.0",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.145",
+    "@types/node": "^20.14.0",
+    "typescript": "^5.6.0"
+  }
+}

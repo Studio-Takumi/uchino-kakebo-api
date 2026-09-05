@@ -1,0 +1,91 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Uchino Kakebo - expense ingest API.
+  API Gateway (REST, x-api-key auth) + single Lambda that reads/writes Supabase.
+
+Parameters:
+  SupabaseUrl:
+    Type: String
+    Description: Supabase project URL (https://xxxx.supabase.co)
+  SupabaseServiceRoleKey:
+    Type: String
+    NoEcho: true
+    Description: Supabase service_role key (server-side only; bypasses RLS)
+  UserId:
+    Type: String
+    NoEcho: true
+    Description: The single Supabase auth user id every row is scoped to
+
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    Timeout: 10
+    MemorySize: 256
+    Architectures:
+      - arm64
+
+Resources:
+  KakeboApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      # Every method requires a valid x-api-key. SAM also provisions a usage plan
+      # and an API key; retrieve the key value after deploy (see README).
+      Auth:
+        ApiKeyRequired: true
+        UsagePlan:
+          CreateUsagePlan: PER_API
+          Description: Usage plan for the Kakebo expense ingest API
+
+  ExpensesApiFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2022
+        Sourcemap: false
+        EntryPoints:
+          - src/handler.ts
+    Properties:
+      Handler: handler.handler
+      CodeUri: .
+      Environment:
+        Variables:
+          SUPABASE_URL: !Ref SupabaseUrl
+          SUPABASE_SERVICE_ROLE_KEY: !Ref SupabaseServiceRoleKey
+          USER_ID: !Ref UserId
+      Events:
+        GetMethods:
+          Type: Api
+          Properties:
+            RestApiId: !Ref KakeboApi
+            Path: /methods
+            Method: get
+        GetCategories:
+          Type: Api
+          Properties:
+            RestApiId: !Ref KakeboApi
+            Path: /categories
+            Method: get
+        GetExpenses:
+          Type: Api
+          Properties:
+            RestApiId: !Ref KakeboApi
+            Path: /expenses
+            Method: get
+        PostExpenses:
+          Type: Api
+          Properties:
+            RestApiId: !Ref KakeboApi
+            Path: /expenses
+            Method: post
+
+Outputs:
+  ApiBaseUrl:
+    Description: Base URL of the deployed API (append /methods, /categories, /expenses)
+    Value: !Sub 'https://${KakeboApi}.execute-api.${AWS::Region}.amazonaws.com/prod'
+  ApiId:
+    Description: REST API id (used to look up the generated API key)
+    Value: !Ref KakeboApi
