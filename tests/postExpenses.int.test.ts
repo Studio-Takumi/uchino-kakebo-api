@@ -108,8 +108,8 @@ describe.skipIf(!RUN)('POST /expenses (integration)', () => {
       expect((await post([validItem({ date: '2026-13-40' })])).status).toBe(400);
       expect(await count()).toBe(16);
     });
-    it('empty title → 400', async () => {
-      expect((await post([validItem({ title: '' })])).status).toBe(400);
+    it('non-string title → 400', async () => {
+      expect((await post([validItem({ title: 123 })])).status).toBe(400);
       expect(await count()).toBe(16);
     });
     it('non-integer expenses → 400', async () => {
@@ -131,10 +131,27 @@ describe.skipIf(!RUN)('POST /expenses (integration)', () => {
       expect(await count()).toBe(16); // the valid sibling was NOT inserted
     });
     it('reports per-item details with index and field', async () => {
-      const r = await post([validItem(), validItem({ expenses: -5, title: '' })]);
+      const r = await post([validItem(), validItem({ expenses: -5, date: 'bad' })]);
       const details = r.body.error.details as Array<{ index: number; field: string }>;
       expect(details.every((d) => d.index === 1)).toBe(true);
-      expect(details.map((d) => d.field).sort()).toEqual(['expenses', 'title']);
+      expect(details.map((d) => d.field).sort()).toEqual(['date', 'expenses']);
+    });
+  });
+
+  describe('empty title is allowed but warned', () => {
+    it('inserts an empty-title row (201) and returns a warning', async () => {
+      const r = await post([validItem({ title: '' })]);
+      expect(r.status).toBe(201);
+      expect(r.body.inserted).toBe(1);
+      expect(r.body.items[0].title).toBe('');
+      expect(await count()).toBe(17);
+      const w = r.body.warnings as Array<{ index: number; field: string; message: string }>;
+      expect(w).toHaveLength(1);
+      expect(w[0]).toMatchObject({ index: 0, field: 'title' });
+    });
+    it('no warnings when the title is non-empty', async () => {
+      const r = await post([validItem()]);
+      expect(r.body.warnings).toEqual([]);
     });
   });
 

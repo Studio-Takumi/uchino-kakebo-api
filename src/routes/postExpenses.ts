@@ -73,8 +73,10 @@ export const postExpenses = async (
   );
 
   // Validate every item first; collect all errors before inserting anything.
+  // `warnings` are non-blocking (e.g. an empty title) — the row is still inserted.
   const now = new Date().toISOString();
   const details: ErrorDetail[] = [];
+  const warnings: ErrorDetail[] = [];
   const rows: NewRow[] = [];
 
   body.forEach((raw, index) => {
@@ -91,8 +93,8 @@ export const postExpenses = async (
     if (!isValidDate(item.date)) {
       push('date', 'must be a valid YYYY-MM-DD date');
     }
-    if (typeof item.title !== 'string' || item.title.length === 0) {
-      push('title', 'must be a non-empty string');
+    if (typeof item.title !== 'string') {
+      push('title', 'must be a string');
     }
     if (typeof item.method_id !== 'string' || !methodIds.has(item.method_id)) {
       push('method_id', 'method_id not found for user');
@@ -109,6 +111,9 @@ export const postExpenses = async (
 
     // Only build the row if this item had no errors so far.
     if (!details.some((d) => d.index === index)) {
+      if (item.title === '') {
+        warnings.push({ index, field: 'title', message: 'title is empty; inserted as-is' });
+      }
       const categoryId = item.category_id as string;
       rows.push({
         id: uuidv7(),
@@ -145,5 +150,5 @@ export const postExpenses = async (
     return error(500, 'INTERNAL_ERROR', 'Failed to insert expenses');
   }
 
-  return json(201, { inserted: data?.length ?? 0, items: data ?? [] });
+  return json(201, { inserted: data?.length ?? 0, items: data ?? [], warnings });
 };
