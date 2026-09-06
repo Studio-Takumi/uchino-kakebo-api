@@ -121,13 +121,14 @@
 | --- | --- |
 | `expenses` | 整数 かつ ≥ 0 |
 | `date` | `YYYY-MM-DD` として妥当 |
-| `title` | 空でない文字列 |
+| `title` | 文字列であること（**空文字 `""` は許可**。ただし空の場合は `warnings` を返す） |
 | `method_id` | そのユーザーに実在 |
 | `category_id` | そのユーザーに実在 |
 | `emoji` | 任意。省略時はカテゴリのデフォルト emoji で補完 |
 | `comment` | 任意。省略時 `""` |
 
 **原子性**: オールオアナッシング。1件でも不正なら何も入れず 400 ＋各要素のエラー。
+**警告（warnings）**: 挿入は妨げない非ブロッキングな注意喚起。現状は「`title` が空」のときに `{ index, field: 'title', message }` を返す。201 の `warnings` 配列に入る（無ければ空配列）。
 **冪等性**: 持たない（同一内容の再送はそのまま重複登録される）。重複防止は呼び出し側が `GET /expenses` と突合して行う。運用上の事故った再送は手動削除で対応。
 
 **201**
@@ -139,6 +140,9 @@
       "emoji": "🍙", "method_id": "uuid", "category_id": "uuid",
       "comment": "created by claude at 2026/09/06",
       "created_time": "2026-09-30T13:00:00.000Z", "last_edited_time": "2026-09-30T13:00:00.000Z" }
+  ],
+  "warnings": [
+    { "index": 3, "field": "title", "message": "title is empty; inserted as-is" }
   ]
 }
 ```
